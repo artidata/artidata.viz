@@ -13,3 +13,5 @@ LazyData: true
 Imports: 
     ggplot2,
     data.table
+URL: https://github.com/artidata/artidata.viz
+BugReports: https://github.com/artidata/artidata.viz/issues
