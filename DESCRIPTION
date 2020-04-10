@@ -6,7 +6,7 @@ Authors@R:
            family = "Haetami",
            role = c("aut", "cre"),
            email = "imaduddin.htm@gmail.com")
-Description: What the package does (one paragraph).
+Description: Wait, what?! Another data visualization tool?!
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -15,3 +15,7 @@ Imports:
     data.table
 URL: https://github.com/artidata/artidata.viz
 BugReports: https://github.com/artidata/artidata.viz/issues
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 6.1.1
+Suggests: 
+    testthat
