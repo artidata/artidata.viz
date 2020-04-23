@@ -24,7 +24,9 @@ test_that("slr",{
   expect_true(all.equal(slr(dt1,"x","y","z"),dt2,tolerance = 0.0001))
 })
 
-dt1 <- data.table(x = runif(10000,-3,3),
+set.seed(240193)
+n=10000
+dt1 <- data.table(x=runif(1,-3,3),
                   y = runif(10000,-3,3),
                   z = 1)
 
@@ -56,6 +58,8 @@ slr(rbindlist(list(dt1,dt2,dt3,dt4)),"x","y","z")
 
 
 hist2d(dtTest,facet = 1,z="z",widthBin = 0.1)
+hist2d(dtTest,facet = 1,z="z",widthBin = 0.1,hasLine=T)
+
 
 hist2d(data.table(x=runif(10000),
                   y=runif(10000)))
