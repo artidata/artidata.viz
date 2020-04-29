@@ -2,51 +2,62 @@
 #'
 #' With data.table Grouping
 #'
-#' @param dt
-#' @param x
-#' @param y
-#' @param z
+#' @param dt a data.table object
+#' @param .x predictor varaible
+#' @param .y response variable
+#' @param .z if grouping needs to be done
 #'
 #' @return data.table object
-#'
-#' @examples
 slr=function(dt,.x,.y,.z){
-  dtSlr=dt[,{fit=lm(get(.y)~get(.x));
-  .(b0=summary(fit)$coef[1,1],
-    se0=summary(fit)$coef[1,2],
-    b1=summary(fit)$coef[2,1],
-    se1=summary(fit)$coef[2,2],
-    r2=summary(fit)$r.square,
+
+  dtSlr=dt[,{fit=summary(lm(get(.y)~get(.x)));
+  .(b0=fit$coef[1,1],
+    se0=fit$coef[1,2],
+    p0=fit$coef[1,4],
+    b1=fit$coef[2,1],
+    se1=fit$coef[2,2],
+    p1=fit$coef[2,4],
+    rsq=fit$r.square,
     n =.N)},
   by=.z]
-  dtSlr
-}
 
+  dtSlr[,sym0:=fcase(p0>=0&p0<0.001,"symbol('\\052')*symbol('\\052')*symbol('\\052')", #plotmath for asterikmath
+                     p0>=0.001&p0<0.01,"symbol('\\052')*symbol('\\052')",
+                     p0>=0.01&p0<0.05,"symbol('\\052')",
+                     p0>=0.05&p0<0.1,"symbol('\\267')",
+                     p0>=0.1&p0<1," ")]
+  dtSlr[,sym1:=fcase(p1>=0&p1<0.001,"symbol('\\052')*symbol('\\052')*symbol('\\052')", #plotmath for asterikmath
+                     p1>=0.001&p1<0.01,"symbol('\052')*symbol('\\052')",
+                     p1>=0.01&p1<0.05,"symbol('\\052')",
+                     p1>=0.05&p1<0.1,"symbol('\\267')",
+                     p1>=0.1&p1<1," ")]
+  dtSlr[]
+}
 #' 2-Dimensional Histogram
 #'
 #' 2D Histogram is an alternative to traditional scatter plot.
 #' Similar with histogram, it constructs bins of regular size, and count the number of observations found in each bin.
 #' However, 2 dimensions are involved in the binning.
 #' It also use colour gradient instead of bar height to represent the count number.
-#' This plotting technique will be more useful when there are points which are closed or even stacked in the scatter plot (overplotting).
+#' This plotting technique will be more useful when many of the points are overlapped, or even stacked in the scatter plot (overplotting).
 #'
 #' @param dt
 #' Data in the class of \code{\link[data.table]{data.table}}.
-#' Do not name column variable with \code{.x} or \code{.y}.
+#' Currently, has name \code{.x} or \code{.y}
 #'
 #' @param x,y
-#' The \emph{name} of the columns in the \code{dt} that will be used as coordinates of the 2D histogram.
-#' The columns must be of numeric vectors.
+#' The name of the columns in the \code{dt} that will be used as coordinates of the 2D histogram.
+#' The columns selected must be of numeric vectors.
 #' These are \code{(x,y)} coordinates when constructing a scatter plot.
 #' If \code{x} and/or \code{y}  is not supplied, the first and/or second column of \code{dt} will be used.
 #'
 #' @param labX,labY
-#' Character strings to be used as axis labels.
+#' Axis label(s) for the plot output.
 #' If not supplied, the value(s) of \code{x} or \code{y} will be used.
 #'
 #' @param limX,limY
 #' The limits of coordinates of x or y axis that will be shown in the plot.
-#' It does \emph{not} affect the regression line if \code{hasLine} is \code{TRUE}.
+#' It does \emph{not} change the regression line if \code{hasLine} is \code{TRUE}.
 #' If not supplied, The values will be the minimum and the maximum value of corresponding dimension.
 #'
 #' @param facet
@@ -61,35 +72,36 @@ slr=function(dt,.x,.y,.z){
 #' Please, set it to \code{NULL} when \code{facet==0}.
 #'
 #' @param nBin
+#' The number of bins to span the length from minimum to maximum point of each coordinate.
+#' If it is a single integer \code{n}, both x and y will be spanned by \code{n} bins each.
+#' If it is an integer vector of length 2 (i.e. \code{c(m,n)}), \code{m} bins will spanned the x coordineates, vice versa.
 #'
 #' @param widthBin
+#'
 #' If not supplied, Freedman and Diaconis’s rule is applied to each dimension.
 #'
 #' @param palette
+#' Color scheme choices as specified in http://colorbrewer2.org
 #'
 #' @param hasLine
 #' logical with \code{FALSE} as the default.
 #' If \code{TRUE}, draw and annotate a simple linear regression line of \code{y} against \code{x}
 #'
-#'
 #' @return
+#'
+#' @example hist2d-example.txt
 #'
 #' @export
 #'
-#' @import data.table ggplot2
-#' @examples
-hist2d=function(dt,
-                x,y,
+#' @import data.table ggplot2 scales
+hist2d=function(dt,x,y,
                 title,labX,labY,
                 limX,limY,
-                facet=0,
-                z=NULL,
-                widthBin,
-                nBin,
+                facet=0,z=NULL,
+                widthBin,nBin,
                 hasLine=F,
-                palette="Reds",
-                theme="minimal",
-                hasGrid=F,
+                statsLine=c("count","rsquare","signif"),
+                palette="Reds",theme="minimal",hasGrid=F,
                 trans="identity"){
 
   if(missing(dt)) stop("hist2d requires a supply of dt, one data.table with at least 2 columns of numeric vectors.")
@@ -118,9 +130,9 @@ hist2d=function(dt,
 
   if(missing(widthBin)&missing(nBin)){
     if(facet==0){
-      widthBin=dt[,c(IQR(get(.x))/.N^(1/3),IQR(get(.y))/.N^(1/3))]
+      widthBin=dt[,c(2*IQR(get(.x))/.N^(1/3),2*IQR(get(.y))/.N^(1/3))]
     }else{
-      widthBin=dt[,.(IQR(get(.x))/.N^(1/3),IQR(get(.y))/.N^(1/3)),by=.z][,c(mean(V1),mean(V2))]
+      widthBin=dt[,.(2*IQR(get(.x))/.N^(1/3),2*IQR(get(.y))/.N^(1/3)),by=.z][,c(mean(V1),mean(V2))]
     }
   }else if(missing(widthBin)&missing(nBin)==F){
     widthBin=c(limX[2]-limX[1],limY[2]-limY[1])/nBin
@@ -133,9 +145,9 @@ hist2d=function(dt,
   hexGrey90=hcl(0,0,90)
   hexWhite=hcl(0,0,100)
 
-  hist2d=ggplot(dt,aes(x=get(.x),y=get(.y)))+
+  hist2d=ggplot(dt,aes_(x=as.name(.x),y=as.name(.y)))+
     geom_bin2d(binwidth=widthBin,
-               color=fcase(theme=="minimal",hexGrey20,
+               color=fcase(theme=="minimal",hexWhite,
                            theme=="grey",hexWhite,
                            theme=="dark",hexGrey80))+
     labs(title=title,x=labX,y=labY,fill="Count")+
@@ -149,8 +161,8 @@ hist2d=function(dt,
                            frame.linewidth=1,
                            ticks.linewidth=1))+
     coord_cartesian(xlim=limX,ylim=limY)+
-    theme(axis.title=element_text(size=rel(1.1)),
-          strip.text=element_text(size=rel(1.1)))
+    theme(axis.title=element_text(size=rel(1)),
+          strip.text=element_text(size=rel(1)))
 
   if(theme=="minimal"){
     hist2d=hist2d+
@@ -196,20 +208,33 @@ hist2d=function(dt,
       facet_grid(vars(get(.z[1])),vars(get(.z[2])))
   }
 
-
   if(hasLine==T){
     dtLm=slr(dt,.x,.y,.z)
-    dtLm[,label:= paste0("list(italic(Y)==",signif(b1,3),"[(",signif(se1,3),")]","*italic(X)",ifelse(b0>=0,"+",""),signif(b0,3),"[(",signif(se1,3),")]",",italic(R^2)==",signif(r2,3),",",
-                        "italic(n)==",n,")")]
-    hist2d=hist2d +
+    dtLm[,label:= paste0("list(italic(Y)==",
+                         label_scientific()(b1),
+                         if("signif"%in%statsLine)paste0("^{",sym1,"}"),
+                         if("stderr"%in%statsLine)paste0("*(",label_scientific()(se1),")"),
+                         "*italic(X)",ifelse(b0>=0,"+",""),
+                         label_scientific()(b0),
+                         if("signif"%in%statsLine)paste0("^{",sym0,"}"),
+                         if("stderr"%in%statsLine)paste0("*(",label_scientific()(se0),")"),
+                         if("rsquare"%in%statsLine)paste0(",italic(R^2)==",label_scientific()(rsq)),
+                         if("count"%in%statsLine)paste0(",italic(n)==",n),
+                         ")")]
+    print(dtLm)
+    hist2d=hist2d+
       geom_abline(data=dtLm,aes(intercept=b0,slope=b1),
                   color=if(theme!="dark"){hexBlack}else{hexWhite},size=1)+
       geom_label(data=dtLm,
                  aes(x=mean(limX), y=Inf, label=label),
-                 vjust="inward", hjust="inward",parse=T,size=rel(4),
+                 vjust="inward", hjust="inward",parse=T,size=rel(3),
                  label.r=unit(0,"line"),
                  color=if(theme!="dark"){hexGrey40}else{hexGrey80},
                  fill=if(theme!="dark"){hexWhite}else{hexBlack})
+
+    if("signif"%in%statsLine){
+      hist2d=hist2d+labs(caption="Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1")
+    }
   }
   hist2d
 }
