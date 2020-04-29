@@ -2,10 +2,16 @@
 % Please edit documentation in R/hello.R
 \name{hello}
 \alias{hello}
-\title{Title}
+\title{Greeting}
 \usage{
 hello(name)
 }
+\arguments{
+\item{name}{write your name here!}
+}
+\value{
+
+}
 \description{
-Title
+Greeting
 }
