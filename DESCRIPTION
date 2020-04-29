@@ -1,21 +1,24 @@
 Package: artidata.viz
-Title: One-Liner Tool to Draw Complex Data Visualizations 
+Title: Artidata's Personal Data Visualization Package
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "Imaduddin",
            family = "Haetami",
            role = c("aut", "cre"),
            email = "imaduddin.htm@gmail.com")
-Description: Wait, what?! Another data visualization tool?!
+Description: While ggplot2 provides an intuitive but exhautive way of doing data visualization, the codes may become very lengthy.
+    Hence, I started making fuctions that within one call, an opinionatedly nice publishing-ready plot is produced.
+    I thought that I can share it with you <3 
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports: 
     ggplot2,
-    data.table
+    data.table,
+    scales
 URL: https://github.com/artidata/artidata.viz
 BugReports: https://github.com/artidata/artidata.viz/issues
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0
 Suggests: 
     testthat
