@@ -3,7 +3,8 @@ library(data.table)
 library(scales)
 #library(artidata.viz)
 set.seed(240193)
-N=10000
+N=100
+
 dtA=data.table(x=runif(N,-3,3),
                y=runif(N,-3,3),
                z="A")
@@ -21,7 +22,8 @@ dtD=data.table(x=c(rnorm(N/2,-1,.75),rnorm(N/2,1,.75)),
                z="D")
 
 dt1=rbindlist(list(dtA,dtB,dtC,dtD))
-ggsave("plot/minimal.png",hist2d(dt1,facet=1),width=30,height=20,units="cm")
+ggsave("plot/minimal100.png",hist2d(dt1,facet=1,hasLine=T),width=30,height=20,units="cm")
+
 ggsave("plot/grey.png",hist2d(dt1,facet=1,theme="grey"),width=30,height=20,units="cm")
 ggsave("plot/dark.png",hist2d(dt1,facet=1,theme="dark"),width=30,height=20,units="cm")
 ggsave("plot/minimal-line.png",hist2d(dt1,facet=1,hasLine=T),width=30,height=20,units="cm")

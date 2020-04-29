@@ -1,0 +1,30 @@
+library(data.table)
+library(ggplot2)
+library(scales)
+
+set.seed(240193)
+
+N=10000
+
+dtA=data.table(x=runif(N,-3,3),y=runif(N,-3,3),z="A")
+
+dtB=data.table(x=rnorm(N),y=rnorm(N),z="B")
+
+dtC=data.table(x=seq(-3,3,length.out = N))
+dtC[,":="(y=0.5*x+rnorm(N,sd=0.5),z="C"),]
+
+dtD=data.table(x=c(rnorm(N/2,-1,.75),rnorm(N/2,1,.75)),
+               y=c(rnorm(N/2,1,.75),rnorm(N/2,-1,.75)),
+               z="D")
+
+dt1=rbindlist(list(dtA,dtB,dtC,dtD))
+
+hist2d(dt1,facet=1)
+
+dt2=data.table(height=c(1.47,1.50,1.52,1.55,1.57,
+                        1.60,1.63,1.65,1.68,1.70,
+                        1.73,1.75,1.78,1.80,1.83),
+               mass=c(52.21,53.12,54.48,55.84,57.20,
+                      58.57,59.93,61.29,63.11,64.47,
+                      66.28,68.10,69.92,72.19,74.46))
+slr(dt2,"x","y","z")
