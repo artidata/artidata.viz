@@ -221,7 +221,7 @@ hist2d=function(dt,x,y,
                          if("rsquare"%in%statsLine)paste0(",italic(R^2)==",label_scientific()(rsq)),
                          if("count"%in%statsLine)paste0(",italic(n)==",n),
                          ")")]
-    print(dtLm)
+    #print(dtLm)
     hist2d=hist2d+
       geom_abline(data=dtLm,aes(intercept=b0,slope=b1),
                   color=if(theme!="dark"){hexBlack}else{hexWhite},size=1)+
