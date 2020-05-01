@@ -88,10 +88,7 @@ hist2d(dt1,facet=1)
 ```
 
 
-
-
-
-You can also add regression line and choose a theme:
+You can also add Linear Regression line:
 
 ```{r}
 hist2d(dt1,facet=1,hasLine=T)
