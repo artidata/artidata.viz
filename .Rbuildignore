@@ -2,6 +2,6 @@
 ^\.Rproj\.user$
 ^LICENSE\.md$
 ^README\.Rmd$
-^external/.+$
-^tests/.+$
-^plot/.+$
+^external.+$
+^tests.+$
+^plot.+$
